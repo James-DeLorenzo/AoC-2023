@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
-# find games that could have 12 red, 13 green, 14 blue
-# add up the game IDS
+# find min num of dice for each game
+# add up the game dice amount multiplied together
 
 class match():
     red = 0
@@ -16,25 +16,27 @@ class match():
     def calculate(self):
         if self.set_strs is None:
             raise KeyError
-        for i, colors in enumerate(self.set_strs):
+        for colors in self.set_strs:
             color_groups = [color.strip() for color in colors.split(",")]
             # print(color_groups)
-            set = [0,0,0]
             for group in color_groups:
                 if "red" in group:
-                    set[0] = int(group.split()[0])
+                    red = int(group.split()[0])
+                    self.red = max(self.red, red)
                 if "green" in group:
-                    set[1] = int(group.split()[0])
+                    green = int(group.split()[0])
+                    self.green = max(self.green, green)
                 if "blue" in group:
-                    set[2] = int(group.split()[0])
-            self.sets.append(set)
-        # print(self.sets)
+                    blue = int(group.split()[0])
+                    self.blue = max(self.blue, blue)
+            # print(f"{self.red} {self.green} {self.blue}")
 
     def set_input(self, inputstr: str):
         id, sets = inputstr.split(":")
         self.id = int(id.split()[1])
         self.set_strs = [pulls.strip() for pulls in sets.split(";")]
         self.sets = []
+        self.set_bagcount(0,0,0)
 
     def set_bagcount(self, red: int, green: int, blue: int):
         self.red = red
@@ -47,8 +49,12 @@ class match():
                 return False
         return True
 
-bag_count = (12, 13, 14)
-matcher = match(bag_count=bag_count)
+    def get_prod(self):
+        prod = self.red * self.green * self.blue
+        # print(f"game {self.id} product: {prod}")
+        return prod
+
+matcher = match()
 
 with open("input") as f:
     count = 0
@@ -57,5 +63,5 @@ with open("input") as f:
         matcher.set_input(line)
         matcher.calculate()
         if matcher.check_if_possible():
-            count = count + matcher.id
+            count = count + matcher.get_prod()
     print(count)
